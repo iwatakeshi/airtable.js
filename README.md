@@ -1,100 +1,103 @@
-The official Airtable JavaScript library.
+# TSDX User Guide
 
-# Airtable.js
+Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
 
-The Airtable API provides a simple way of accessing your data. Whether it's contacts, sales leads,
-inventory, applicant information or todo items, the vocabulary of the interactions closely matches
-your data structure. You will use your table names to address tables, column names to access data
-stored in those columns. In other words, the Airtable API is your own RESTful API for your base.
+> This TSDX setup is meant for developing libraries (not apps!) that can be published to NPM. If you’re looking to build a Node app, you could use `ts-node-dev`, plain `ts-node`, or simple `tsc`.
 
-# Installation
+> If you’re new to TypeScript, checkout [this handy cheatsheet](https://devhints.io/typescript)
 
-### Node.js
+## Commands
 
-To install airtable.js in a node project:
+TSDX scaffolds your new library inside `/src`.
 
-```sh
-# npm
-npm install airtable
-# yarn
-yarn add airtable
+To run TSDX, use:
 
+```bash
+npm start # or yarn start
 ```
 
-# Configuration
+This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
 
-There are three configurable options available:
+To do a one-off build, use `npm run build` or `yarn build`.
 
-- `apiKey` - set the token to your secret API token. Visit
-  [your account page](https://airtable.com/account) to create an API token. (`AIRTABLE_API_KEY`)
-- `endpointUrl` - the API endpoint to hit. You might want to override it if you are using an API
-  proxy (e.g. runscope.net) to debug your API calls. (`AIRTABLE_ENDPOINT_URL`)
-- `requestTimeout` - the timeout in milliseconds for requests. The default is 5 minutes (`300000`)
+To run tests, use `npm test` or `yarn test`.
 
-You can set the options globally via `Airtable.configure`:
+## Configuration
 
-    Airtable.configure({ apiKey: 'YOUR_SECRET_API_KEY' })
+Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
 
-Globally via process env (e.g. in 12factor setup).
+### Jest
 
-    export AIRTABLE_API_KEY=YOUR_SECRET_API_KEY
+Jest tests are set up to run with `npm test` or `yarn test`.
 
-You can also override the settings per connection:
+### Bundle Analysis
 
-    var airtable = new Airtable({endpointUrl: 'https://api-airtable-com-8hw7i1oz63iz.runscope.net/'})
+[`size-limit`](https://github.com/ai/size-limit) is set up to calculate the real cost of your library with `npm run size` and visualize the bundle with `npm run analyze`.
 
-# Interactive documentation
+#### Setup Files
 
-Go to https://airtable.com/api to see the interactive API documentation for your Airtable bases.
-Once you select a base, click the "JavaScript" tab to see code snippets using Airtable.js. It'll
-have examples for all operations you can perform against your base using this library.
+This is the folder structure we set up for you:
 
-# Usage
+```txt
+/src
+  index.tsx       # EDIT THIS
+/test
+  blah.test.tsx   # EDIT THIS
+.gitignore
+package.json
+README.md         # EDIT THIS
+tsconfig.json
+```
 
-```ts
-import Airtable from 'airtable'
+### Rollup
 
-const airtable = new Airtable({ apiKey: '...' })
+TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
 
-const base = airtable.base('base_id')
-const table = base.table('My Table')
+### TypeScript
 
-// Get the records
-const { records, offset } = await table.records({ maxResult: 10 })
+`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
 
-for (const record of records) {
-  const { 'Project Name': name } = record.fields
-  console.log(name)
+## Continuous Integration
+
+### GitHub Actions
+
+Two actions are added by default:
+
+- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
+- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
+
+## Optimizations
+
+Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
+
+```js
+// ./types/index.d.ts
+declare var __DEV__: boolean;
+
+// inside your code...
+if (__DEV__) {
+  console.log('foo');
 }
-
-// You can also auto paginate
-for await (const records of table.list({ maxResult: 10 })) {
-  for (const record of records) {
-    const { 'Project Name': name } = record.fields
-    console.log(name)
-  }
-}
 ```
 
-# Examples
+You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
 
-Two examples are provided. The first is a Next.js project and the second is a Nuxt project. Both
-examples use the basic `Project tracker` example that Airtable provides when creating an account.
+## Module Formats
 
-To start the Next project, you will need to copy `.env.development` to `.env.development.local` and
-add the API key and the base ID that you will be using. Then, run `npm run serve:next`.
+CJS, ESModules, and UMD module formats are supported.
 
-To start the Nuxt project, you will need to prepend the API key and the base ID to the `dev` script:
+The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
 
-```sh
-AIRTABLE_API_KEY=... AIRTABLE_BASE_ID=... npm run serve:nuxt
-```
+## Named Exports
 
-# Tests
+Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
 
-Tests are run via `npm run test`.
+## Including Styles
 
-We strive for 100% test coverage. Some aspects may not be testable or suitable for test coverage.
+There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
 
-When you run the tests a coverage report will be generated at `./coverage/lcov-report/index.html`
-which you can access in the browser for line by line reporting.
+For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
+
+## Publishing to NPM
+
+We recommend using [np](https://github.com/sindresorhus/np).
