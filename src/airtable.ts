@@ -1,44 +1,45 @@
-import Base from './base'
-import { merge } from 'lodash'
+import Base from './base';
+import { merge } from 'lodash';
 
 export interface AirtableConfig {
-  endpointUrl: string
-  apiVersion: string
-  apiKey: string
+  endpointUrl: string;
+  apiVersion: string;
+  apiKey: string;
   // noRetryIfRateLimited: boolean
-  requestTimeout: number
+  requestTimeout: number;
 }
 
-export type AirtableOptions = Partial<Omit<AirtableConfig, 'apiVersion'>>
+export type AirtableOptions = Partial<Omit<AirtableConfig, 'apiVersion'>>;
 
 export default class Airtable {
-  static Base = Base
+  static Base = Base;
 
-  static apiVersion?: string
-  static endpointUrl?: string
-  static apiKey?: string
-  static apiVersionMajor?: string
-  static noRetryIfRateLimited?: boolean
-  static requestTimeout?: number
+  static apiVersion?: string;
+  static endpointUrl?: string;
+  static apiKey?: string;
+  static apiVersionMajor?: string;
+  static noRetryIfRateLimited?: boolean;
+  static requestTimeout?: number;
 
-  private options?: AirtableOptions
+  private options?: AirtableOptions;
 
   /**
    * Returns the default configuration for Airtable
    */
   static defaultConfig = (): Partial<AirtableConfig> => ({
-    endpointUrl: process?.env?.AIRTABLE_ENDPOINT_URL || 'https://api.airtable.com',
+    endpointUrl:
+      process?.env?.AIRTABLE_ENDPOINT_URL || 'https://api.airtable.com',
     apiVersion: '0.1.0',
     apiKey: process?.env?.AIRTABLE_API_KEY,
     // noRetryIfRateLimited: false,
     requestTimeout: 300 * 1000, // 5 minutes
-  })
+  });
 
   constructor(options?: AirtableOptions) {
-    this.configure(merge(Airtable.defaultConfig(), options))
+    this.configure(merge(Airtable.defaultConfig(), options));
 
     if (!Airtable.apiKey && !this.options?.apiKey) {
-      throw new Error('An API key is required to connect to Airtable')
+      throw new Error('An API key is required to connect to Airtable');
     }
   }
 
@@ -48,9 +49,9 @@ export default class Airtable {
    * @returns An instance of `Airtable`
    */
   configure(options: AirtableOptions): Airtable {
-    this.options = options
-    Airtable.configure(options)
-    return this
+    this.options = options;
+    Airtable.configure(options);
+    return this;
   }
 
   /**
@@ -59,21 +60,26 @@ export default class Airtable {
    */
   static configure(
     options: AirtableOptions
-  ): Partial<Pick<AirtableConfig, 'endpointUrl' | 'apiKey' | 'requestTimeout'>> {
+  ): Partial<
+    Pick<AirtableConfig, 'endpointUrl' | 'apiKey' | 'requestTimeout'>
+  > {
     const {
       apiVersion,
       endpointUrl,
       apiKey,
       // noRetryIfRateLimited,
       requestTimeout,
-    } = Airtable.defaultConfig()
+    } = Airtable.defaultConfig();
 
-    Airtable.apiKey = Airtable.apiKey || options?.apiKey || apiKey
-    Airtable.endpointUrl = Airtable.endpointUrl || options?.endpointUrl || endpointUrl
-    Airtable.apiVersion = Airtable.apiVersion || apiVersion
-    Airtable.apiVersionMajor = Airtable.apiVersionMajor || apiVersion?.split('.')[0]
-    Airtable.requestTimeout = Airtable.requestTimeout || options?.requestTimeout || requestTimeout
-    return options
+    Airtable.apiKey = Airtable.apiKey || options?.apiKey || apiKey;
+    Airtable.endpointUrl =
+      Airtable.endpointUrl || options?.endpointUrl || endpointUrl;
+    Airtable.apiVersion = Airtable.apiVersion || apiVersion;
+    Airtable.apiVersionMajor =
+      Airtable.apiVersionMajor || apiVersion?.split('.')[0];
+    Airtable.requestTimeout =
+      Airtable.requestTimeout || options?.requestTimeout || requestTimeout;
+    return options;
   }
   /**
    * Returns an instance of `Base`
@@ -84,19 +90,19 @@ export default class Airtable {
       ...this.options,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       apiVersionMajor: Airtable.apiVersionMajor!,
-    })
+    });
   }
   /**
    * Returns an instance of `Base`
    * @param id The base id
    */
   static base(id: string): Base {
-    const { endpointUrl, apiKey, requestTimeout } = Airtable
+    const { endpointUrl, apiKey, requestTimeout } = Airtable;
     return new Airtable({
       endpointUrl,
       apiKey: apiKey || '',
       // noRetryIfRateLimited,
       requestTimeout,
-    }).base(id)
+    }).base(id);
   }
 }
